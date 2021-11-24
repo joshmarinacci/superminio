@@ -96,6 +96,11 @@ class JSONTileMap implements TileMap {
             this.set_xy(x+i,y,tt)
         }
     }
+    vline(x: number, y: number, len: number, tt:TileType) {
+        for(let i=0; i<len; i++) {
+            this.set_xy(x,y+i,tt)
+        }
+    }
 
     private set_xy(x: number, y: number, tt: TileType) {
         if(x<0) return
@@ -149,7 +154,11 @@ export class Game {
         this.map.hline(0,13,50, SOLID)
         this.map.hline(0,14,50, SOLID)
         this.map.hline(0,15,50, SOLID)
-        this.map.hline(20,11,1, SOLID)
+        this.map.vline(20,11,1, SOLID)
+        this.map.vline(21,10,2, SOLID)
+        this.map.vline(22,9,3, SOLID)
+
+        this.map.vline(0,0,20,SOLID)
 
 
         this.keyboard = new Keyboard()
@@ -273,6 +282,7 @@ export class Game {
         if(diff < 4) {
             this.board.scroll.x -= 1
         }
+        if(this.board.scroll.x < 0) this.board.scroll.x = 0
     }
 }
 
