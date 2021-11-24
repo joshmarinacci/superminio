@@ -48,6 +48,7 @@ export class Keyboard {
 }
 
 interface Player {
+    alive: boolean;
     tile_pos:Point
     offset:Point
     dv:Point
@@ -81,10 +82,10 @@ class JSONTileMap implements TileMap {
         }
     }
     tile_at(x, y): TileType {
-        return this.data[this.xy2n(x,y)]
+        return this.get_xy(x,y)
     }
     tile_at_point(pt:Point):TileType {
-        return this.data[this.xy2n(pt.x,pt.y)]
+        return this.get_xy(pt.x,pt.y)
     }
 
     private xy2n(i: number, j: number) {
@@ -100,6 +101,13 @@ class JSONTileMap implements TileMap {
         for(let i=0; i<len; i++) {
             this.set_xy(x,y+i,tt)
         }
+    }
+    private get_xy(x:number, y:number):TileType {
+        if(x<0) return NONE
+        if(x>=this.width) return NONE
+        if(y<0)return NONE
+        if(y>=this.height) return NONE
+        return this.data[this.xy2n(x,y)]
     }
 
     private set_xy(x: number, y: number, tt: TileType) {
@@ -140,6 +148,7 @@ export class Game {
             width: 32
         }
         this.player = {
+            alive:true,
             big: false,
             onground:false,
             jumping:false,
@@ -206,6 +215,11 @@ export class Game {
     }
 
     private run_physics() {
+        if(this.player.tile_pos.y > 16) {
+            // log("off the bottom")
+            this.player.alive = false
+            return
+        }
         //add gravity accelration
         this.player.dv =  this.player.dv.add(this.player.gravity)
         //max falling speed
@@ -233,14 +247,18 @@ export class Game {
         }
 
         //now check just falling straight down
-        // let below_tile = this.map.tile_at_point(this.player.tile_pos.add(new Point(0,this.player.dv.y)))
-        // log("below",below_tile,this.player.tile_pos)
-        // if(below_tile === SOLID) {
-        //     log("solid",SOLID)
-            // this.player.dv.y = 0
-            // this.player.onground = true
-            // this.player.jumping = false
-        // }
+        let below_tile = this.map.tile_at_point(this.player.tile_pos.add(new Point(0,this.player.dv.y)))
+        log("below",below_tile,this.player.tile_pos)
+        if(below_tile === TRANSPARENT || below_tile === NONE) {
+            //we are falling
+            this.player.tile_pos = this.player.tile_pos.add(new Point(0,this.player.dv.y))
+            this.player.dv.x = 0
+        }
+
+        //we must be stopped
+        this.player.onground = true
+
+
     }
 
     private draw_screen() {
