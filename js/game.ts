@@ -59,9 +59,18 @@ interface Player {
 }
 
 const NONE = 0
-const SOLID = 1
-const TRANSPARENT = 2
-type TileType = 0 | 1 | 2
+const TRANSPARENT = 1
+const SOLID = 2
+const PIPE = 3
+
+const COLORS:Map<TileType,string> = new Map<TileType, string>()
+COLORS.set(NONE,'magenta')
+COLORS.set(TRANSPARENT,'#3366FF')
+COLORS.set(SOLID,'#FFcc44')
+COLORS.set(PIPE,'#22cc22')
+
+
+type TileType = 0 | 1 | 2 | 3
 
 interface TileMap {
     tile_at(x,y):TileType
@@ -77,7 +86,7 @@ class JSONTileMap implements TileMap {
         this.data = []
         for(let i=0; i<this.width; i++) {
             for(let j=0; j<this.height; j++) {
-                this.data[this.xy2n(i,j)] = NONE
+                this.data[this.xy2n(i,j)] = TRANSPARENT
             }
         }
     }
@@ -163,12 +172,15 @@ export class Game {
         this.map.hline(0,13,50, SOLID)
         this.map.hline(0,14,50, SOLID)
         this.map.hline(0,15,50, SOLID)
+
+        this.map.vline(0,0,20,SOLID)
+
         this.map.vline(20,11,1, SOLID)
         this.map.vline(21,10,2, SOLID)
         this.map.vline(22,9,3, SOLID)
 
-        this.map.vline(0,0,20,SOLID)
-
+        this.map.vline(27, 7,5,PIPE)
+        this.map.vline(28, 7,5,PIPE)
 
         this.keyboard = new Keyboard()
     }
@@ -275,9 +287,10 @@ export class Game {
             for(let j=0; j<this.map.height; j++) {
                 let t = this.map.tile_at(i,j)
                 c.fillStyle = 'yellow'
-                if(t === NONE) c.fillStyle = '#cccccc'
-                if(t === TRANSPARENT) c.fillStyle = 'white'
-                if(t === SOLID) c.fillStyle = 'tan'
+                c.fillStyle = COLORS.get(t)
+                // if(t === NONE) c.fillStyle = '#cccccc'
+                // if(t === TRANSPARENT) c.fillStyle = 'white'
+                // if(t === SOLID) c.fillStyle = 'tan'
                 c.fillRect(i,j,1,1)
             }
         }
