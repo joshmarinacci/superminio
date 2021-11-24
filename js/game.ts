@@ -163,9 +163,10 @@ export class Game {
     loop() {
         this.check_input()
         this.run_physics()
+        this.update_scroll()
         this.draw_screen()
         if(this.debug.slow) {
-            setTimeout(()=>this.loop(),1000)
+            setTimeout(()=>this.loop(),50)
         } else {
             requestAnimationFrame(() => this.loop())
         }
@@ -200,7 +201,7 @@ export class Game {
         this.player.dv =  this.player.dv.add(this.player.gravity)
         //max falling speed
         if(this.player.dv.y > 1) this.player.dv.y = 1
-        log(this.player.tile_pos,this.player.dv,this.player.onground,this.player.jumping)
+        // log(this.player.tile_pos,this.player.dv,this.player.onground,this.player.jumping)
 
         //go in dv direction
         let new_pos = this.player.tile_pos.add(this.player.dv)
@@ -241,6 +242,7 @@ export class Game {
         c.fillRect(0,0,this.board.width,this.board.height)
 
 
+        c.translate(-this.board.scroll.x,-this.board.scroll.y)
         //draw the tilemap
         for(let i=0; i<this.map.width; i++) {
             for(let j=0; j<this.map.height; j++) {
@@ -259,6 +261,18 @@ export class Game {
         c.fillRect(tp.x,tp.y,1,1)
 
         c.restore()
+    }
+
+    private update_scroll() {
+        //if player too far to the left, scroll to the right, unless at the end
+        //if player too far to the right, scroll to the left
+        let diff = this.player.tile_pos.x - this.board.scroll.x
+        if(diff > 20) {
+            this.board.scroll.x += 1
+        }
+        if(diff < 4) {
+            this.board.scroll.x -= 1
+        }
     }
 }
 
