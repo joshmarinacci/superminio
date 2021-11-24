@@ -1,0 +1,20 @@
+{
+  "name": "superminio",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "npx tsc",
+    "local-dev": "http-server ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "pureimage": "^0.3.5",
+    "typescript": "^4.4.4"
+  }
+
+}
