@@ -69,6 +69,11 @@ COLORS.set(TRANSPARENT,'#3366FF')
 COLORS.set(SOLID,'#FFcc44')
 COLORS.set(PIPE,'#22cc22')
 
+const BLOCKING:Map<TileType,boolean> = new Map<TileType, boolean>()
+BLOCKING.set(NONE,false)
+BLOCKING.set(TRANSPARENT,false)
+BLOCKING.set(SOLID,true)
+BLOCKING.set(PIPE,true)
 
 type TileType = 0 | 1 | 2 | 3
 
@@ -241,8 +246,7 @@ export class Game {
         //go in dv direction
         let new_pos = this.player.tile_pos.add(this.player.dv)
         let next_tile = this.map.tile_at_point(new_pos)
-        // log("new pos",next_tile,new_pos)
-        if(next_tile === TRANSPARENT || next_tile === NONE) {
+        if(BLOCKING.get(next_tile) === false) {
             this.player.tile_pos = new_pos
             return
         }
@@ -250,7 +254,7 @@ export class Game {
         //now check just left or right
         let adj_tile = this.map.tile_at_point(this.player.tile_pos.add(new Point(this.player.dv.x,0)))
         // log("adj",adj_tile)
-        if(adj_tile === TRANSPARENT || adj_tile === NONE) {
+        if(BLOCKING.get(adj_tile) === false){
             this.player.tile_pos = this.player.tile_pos.add(new Point(this.player.dv.x,0))
             this.player.dv.y = 0
             this.player.onground = true
@@ -261,7 +265,7 @@ export class Game {
         //now check just falling straight down
         let below_tile = this.map.tile_at_point(this.player.tile_pos.add(new Point(0,this.player.dv.y)))
         log("below",below_tile,this.player.tile_pos)
-        if(below_tile === TRANSPARENT || below_tile === NONE) {
+        if(BLOCKING.get(below_tile) === false){
             //we are falling
             this.player.tile_pos = this.player.tile_pos.add(new Point(0,this.player.dv.y))
             this.player.dv.x = 0
