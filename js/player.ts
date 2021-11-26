@@ -9,6 +9,8 @@ export class Player {
     big: boolean
     onground: boolean
     jumping: boolean
+    frame:number
+    frame_count:number
     constructor() {
         this.alive = true
         this.big = false
@@ -18,6 +20,8 @@ export class Player {
         this.tile_pos = new Point(3,2)
         this.dv = new Point(0,1)
         this.gravity = new Point(0,1)
+        this.frame = 0
+        this.frame_count = 2
     }
 
     reset(): void {

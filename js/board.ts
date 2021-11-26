@@ -40,8 +40,10 @@ TILESET_MAP.set(CLOUD,new Point(5,1))
 
 TILESET_MAP.set(GOOMBA,new Point(0,2))
 
-const MINIMARIO = 999
-TILESET_MAP.set(MINIMARIO, new Point(2,2))
+const MINIMARIO_0 = 500
+const MINIMARIO_1 = 501
+TILESET_MAP.set(MINIMARIO_0, new Point(2,2))
+TILESET_MAP.set(MINIMARIO_1, new Point(3,2))
 
 export class ScreenBoard implements Board {
     height: number;
@@ -50,12 +52,14 @@ export class ScreenBoard implements Board {
     private scale: number;
     private canvas: HTMLCanvasElement;
     private tileset: HTMLImageElement;
+    private tick:number
 
     constructor(width: number, height: number, scale: number) {
         this.scroll = new Point(0, 0)
         this.width = width
         this.height = height
         this.scale = scale
+        this.tick = 0
     }
 
     setup_canvas() {
@@ -71,6 +75,7 @@ export class ScreenBoard implements Board {
     }
 
     draw_screen(map: TileMap, player: Player): void {
+        this.tick += 1
         let c = this.canvas.getContext('2d')
         c.save()
         c.scale(this.scale, this.scale)
@@ -100,13 +105,14 @@ export class ScreenBoard implements Board {
 
         //draw the player
         let tp = player.tile_pos
-        let pt:Point = TILESET_MAP.get(MINIMARIO)
+        if(this.tick % 4 === 0) { //update every 10th frame
+            player.frame = (player.frame + 1) % player.frame_count
+        }
+        let pt:Point = TILESET_MAP.get(MINIMARIO_0+player.frame)
         c.drawImage(this.tileset,
             pt.x*ts,pt.y*ts,ts,ts,
             tp.x,tp.y,1,1
         )
-        // c.fillStyle = '#ff0000'
-        // c.fillRect(tp.x, tp.y, 1, 1)
 
         c.restore()
     }
