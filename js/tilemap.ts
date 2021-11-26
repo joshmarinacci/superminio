@@ -4,24 +4,36 @@ export const NONE = 0
 export const TRANSPARENT = 1
 export const SOLID = 2
 export const PIPE = 3
+export const PIPE_LEFT = 5
+export const PIPE_RIGHT = 4
+
+export const MOUNTAIN = 6
+
 export const COLORS: Map<TileType, string> = new Map<TileType, string>()
-export const BLOCKING: Map<TileType, boolean> = new Map<TileType, boolean>()
+export const BLOCKING: Set<TileType> = new Set()
 
 COLORS.set(NONE,'magenta')
 COLORS.set(TRANSPARENT,'#3366FF')
 COLORS.set(SOLID,'#FFcc44')
 COLORS.set(PIPE,'#22cc22')
+COLORS.set(PIPE_LEFT,'#008800')
+COLORS.set(PIPE_RIGHT,'#44ff44')
+COLORS.set(MOUNTAIN,"#00cc00")
 
-BLOCKING.set(NONE,false)
-BLOCKING.set(TRANSPARENT,false)
-BLOCKING.set(SOLID,true)
-BLOCKING.set(PIPE,true)
+BLOCKING.add(SOLID)
+BLOCKING.add(PIPE)
+BLOCKING.add(PIPE_LEFT)
+BLOCKING.add(PIPE_RIGHT)
 
 
-type TileType = 0 | 1 | 2 | 3
+type TileType = number
 
 interface TileMap {
     tile_at(x, y): TileType
+}
+
+function log(...args) {
+    console.log(...args)
 }
 
 export class JSONTileMap implements TileMap {
@@ -51,6 +63,27 @@ export class JSONTileMap implements TileMap {
 
         this.vline(27, 7, 5, PIPE)
         this.vline(28, 7, 5, PIPE)
+
+        this.hline(1,11,5, MOUNTAIN)
+        this.hline(2,10,3, MOUNTAIN)
+        this.hline(3,9,1, MOUNTAIN)
+    }
+
+    enhance() {
+        let d2 = new Array(this.data.length)
+        d2.fill(NONE)
+        for(let i=0; i<this.width; i++) {
+            for(let j=0; j<this.height; j++) {
+                let n = this.xy2n(i,j)
+                let v = this.data[n]
+                let left = this.tile_at(i-1,j)
+                let right = this.tile_at(i+1,j)
+                if(v === PIPE && left === TRANSPARENT) v = PIPE_LEFT
+                if(v === PIPE && right === TRANSPARENT) v = PIPE_RIGHT
+                d2[n] = v
+            }
+        }
+        this.data = d2
     }
 
     tile_at(x, y): TileType {

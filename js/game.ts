@@ -112,6 +112,7 @@ export class Game {
             gravity: new Point(0,1)
         }
         this.map = new JSONTileMap()
+        this.map.enhance()
         this.keyboard = new Keyboard()
     }
 
@@ -165,7 +166,8 @@ export class Game {
         //go in dv direction
         let new_pos = this.player.tile_pos.add(this.player.dv)
         let next_tile = this.map.tile_at_point(new_pos)
-        if(BLOCKING.get(next_tile) === false) {
+        // log("next",next_tile)
+        if(!BLOCKING.has(next_tile)) {
             this.player.tile_pos = new_pos
             return
         }
@@ -173,7 +175,7 @@ export class Game {
         //now check just left or right
         let adj_tile = this.map.tile_at_point(this.player.tile_pos.add(new Point(this.player.dv.x,0)))
         // log("adj",adj_tile)
-        if(BLOCKING.get(adj_tile) === false){
+        if(!BLOCKING.has(adj_tile)) {
             this.player.tile_pos = this.player.tile_pos.add(new Point(this.player.dv.x,0))
             this.player.dv.y = 0
             this.player.onground = true
@@ -183,8 +185,8 @@ export class Game {
 
         //now check just falling straight down
         let below_tile = this.map.tile_at_point(this.player.tile_pos.add(new Point(0,this.player.dv.y)))
-        log("below",below_tile,this.player.tile_pos)
-        if(BLOCKING.get(below_tile) === false){
+        // log("below",below_tile,this.player.tile_pos)
+        if(!BLOCKING.has(below_tile)){
             //we are falling
             this.player.tile_pos = this.player.tile_pos.add(new Point(0,this.player.dv.y))
             this.player.dv.x = 0
