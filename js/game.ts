@@ -22,16 +22,7 @@ export class Game {
         }
         this.scale = 20
         this.board = new ScreenBoard(32,16, this.scale)
-        this.player = {
-            alive:true,
-            big: false,
-            onground:false,
-            jumping:false,
-            offset: new Point(0,0),
-            tile_pos: new Point(3,2),
-            dv:new Point(0,1),
-            gravity: new Point(0,1)
-        }
+        this.player = new Player()
         this.map = new JSONTileMap()
         this.map.enhance()
         this.keyboard = new Keyboard()
@@ -44,6 +35,9 @@ export class Game {
         this.loop()
     }
     loop() {
+        if(this.player.alive === false) {
+            this.reset_level()
+        }
         this.check_input()
         this.run_physics()
         this.board.update_scroll(this.player)
@@ -119,6 +113,10 @@ export class Game {
 
     }
 
+    private reset_level() {
+        this.player.reset()
+        this.board.reset()
+    }
 }
 
 /*
