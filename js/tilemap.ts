@@ -8,6 +8,16 @@ export const PIPE_LEFT = 5
 export const PIPE_RIGHT = 4
 
 export const MOUNTAIN = 6
+export const MOUNTAIN_LEFT = 7
+export const MOUNTAIN_RIGHT = 8
+export const MOUNTAIN_TOP = 9
+
+export const TREE = 10
+export const GROUND = 11
+export const QUESTION = 12
+export const BRICK = 13
+export const CLOUD = 14
+export const GOOMBA = 15
 
 export const COLORS: Map<TileType, string> = new Map<TileType, string>()
 export const BLOCKING: Set<TileType> = new Set()
@@ -21,6 +31,7 @@ COLORS.set(PIPE_RIGHT,'#44ff44')
 COLORS.set(MOUNTAIN,"#00cc00")
 
 BLOCKING.add(SOLID)
+BLOCKING.add(GROUND)
 BLOCKING.add(PIPE)
 BLOCKING.add(PIPE_LEFT)
 BLOCKING.add(PIPE_RIGHT)
@@ -50,23 +61,44 @@ export class JSONTileMap implements TileMap {
                 this.data[this.xy2n(i, j)] = TRANSPARENT
             }
         }
-        this.hline(0, 12, 50, SOLID)
+        this.hline(0, 12, 50, GROUND)
         this.hline(0, 13, 50, SOLID)
         this.hline(0, 14, 50, SOLID)
         this.hline(0, 15, 50, SOLID)
 
         this.vline(0, 0, 20, SOLID)
 
-        this.vline(20, 11, 1, SOLID)
-        this.vline(21, 10, 2, SOLID)
-        this.vline(22, 9, 3, SOLID)
+        // this.vline(20, 11, 1, SOLID)
+        // this.vline(21, 10, 2, SOLID)
+        // this.vline(22, 9, 3, SOLID)
 
-        this.vline(27, 7, 5, PIPE)
-        this.vline(28, 7, 5, PIPE)
 
-        this.hline(1,11,5, MOUNTAIN)
-        this.hline(2,10,3, MOUNTAIN)
-        this.hline(3,9,1, MOUNTAIN)
+        this.hline(2,11,5, MOUNTAIN)
+        this.hline(3,10,3, MOUNTAIN)
+        this.hline(4,9,1, MOUNTAIN)
+
+        this.hline(12,11,3, TREE)
+        this.hline(16,7,1, QUESTION)
+
+        this.hline(16,11,3, MOUNTAIN)
+        this.hline(17,10,1, MOUNTAIN)
+
+        this.hline(20,0,1,CLOUD)
+        this.hline(20,7,5, BRICK)
+        this.hline(21,7,1, QUESTION)
+        this.hline(22,2,1, QUESTION)
+        this.hline(22,11,1,GOOMBA)
+        this.hline(23,7,1, QUESTION)
+        this.hline(23,11,3, TREE)
+
+        this.hline(28,2,3,CLOUD)
+        this.vline(29, 10, 2, PIPE)
+        this.vline(30, 10, 2, PIPE)
+
+        this.hline(35,1,2,CLOUD)
+        this.vline(36, 9, 3, PIPE)
+        this.vline(37, 9, 3, PIPE)
+
     }
 
     enhance() {
@@ -80,6 +112,9 @@ export class JSONTileMap implements TileMap {
                 let right = this.tile_at(i+1,j)
                 if(v === PIPE && left === TRANSPARENT) v = PIPE_LEFT
                 if(v === PIPE && right === TRANSPARENT) v = PIPE_RIGHT
+                if(v === MOUNTAIN && left === TRANSPARENT) v = MOUNTAIN_LEFT
+                if(v === MOUNTAIN && right === TRANSPARENT) v = MOUNTAIN_RIGHT
+                if(v === MOUNTAIN && left === TRANSPARENT && right === TRANSPARENT) v = MOUNTAIN_TOP
                 d2[n] = v
             }
         }

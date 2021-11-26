@@ -1,89 +1,10 @@
 import {Point} from "./util.js";
 import {Keyboard} from "./keyboard.js";
-import {BLOCKING, COLORS, JSONTileMap} from "./tilemap.js";
+import {BLOCKING, JSONTileMap} from "./tilemap.js";
+import {Player} from "./player.js";
+import {ScreenBoard} from "./board.js";
 
 const log = (...args) => console.log(...args)
-
-interface Player {
-    alive: boolean;
-    tile_pos:Point
-    offset:Point
-    dv:Point
-    gravity:Point
-    big:boolean
-    onground:boolean
-    jumping:boolean
-}
-
-interface Board {
-//     scroll:Point
-//     width:32,
-//     height:16
-    setup_canvas(): void;
-
-    draw_screen(map: JSONTileMap, player: Player): void;
-}
-export class ScreenBoard implements Board {
-    height: number;
-    scroll: Point;
-    width: number;
-    private scale: number;
-    private canvas: HTMLCanvasElement;
-
-    constructor(width: number, height: number, scale:number) {
-        this.scroll = new Point(0,0)
-        this.width = width
-        this.height = height
-        this.scale = scale
-    }
-
-    setup_canvas() {
-        this.canvas = document.createElement('canvas')
-        this.canvas.width = this.width*this.scale
-        this.canvas.height = this.height*this.scale
-        document.body.append(this.canvas)
-    }
-
-    draw_screen(map: JSONTileMap, player: Player): void {
-        let c = this.canvas.getContext('2d')
-        c.save()
-        c.scale(this.scale,this.scale)
-        c.fillStyle = '#f0f0f0'
-        c.fillRect(0,0,this.width,this.height)
-
-
-        c.translate(-this.scroll.x,-this.scroll.y)
-        //draw the tilemap
-        for(let i=0; i<map.width; i++) {
-            for(let j=0; j<map.height; j++) {
-                let t = map.tile_at(i,j)
-                c.fillStyle = 'yellow'
-                c.fillStyle = COLORS.get(t)
-                c.fillRect(i,j,1,1)
-            }
-        }
-
-        //draw the player
-        let tp = player.tile_pos
-        c.fillStyle = '#ff0000'
-        c.fillRect(tp.x,tp.y,1,1)
-
-        c.restore()
-    }
-
-    update_scroll(player: Player) {
-        //if player too far to the left, scroll to the right, unless at the end
-        //if player too far to the right, scroll to the left
-        let diff = player.tile_pos.x - this.scroll.x
-        if(diff > 20) {
-            this.scroll.x += 1
-        }
-        if(diff < 4) {
-            this.scroll.x -= 1
-        }
-        if(this.scroll.x < 0) this.scroll.x = 0
-    }
-}
 
 export class Game {
     private board: ScreenBoard;
