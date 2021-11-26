@@ -174,3 +174,126 @@ export class JSONTileMap implements TileMap {
         return this.width
     }
 }
+
+function get_image_data(img: HTMLImageElement):ImageData {
+    let can = document.createElement('canvas')
+    can.width = img.width
+    can.height = img.height
+    let ctx = can.getContext('2d')
+    ctx.drawImage(img,0,0)
+    return ctx.getImageData(0,0,img.width,img.height)
+}
+
+function equal_colors(color1: number[], color2: number[]):boolean {
+    if(color1.length !== color2.length) return false
+    for(let i=0; i<color1.length; i++) {
+        if(color1[i] !== color2[i]) return false
+    }
+    return true
+}
+
+function calc_type(color: number[]):TileType {
+    let DARK_BROWN = [80,48,0,255]
+    let sky_blue = [60,188,252,255]
+    let dark_green = [0,88,0,255]
+
+    let light_green = [184,248,24,255]
+    let white = [252,252,252,255]
+    let orange_brown = [228,92,16,255]
+    let brown = [172,124,0,255]
+    let medium_green = [0,168,68,255]
+
+    if(equal_colors(color,DARK_BROWN)) return GROUND
+    if(equal_colors(color,sky_blue)) return TRANSPARENT
+    if(equal_colors(color,dark_green)) return MOUNTAIN
+    if(equal_colors(color,light_green)) return TREE
+    if(equal_colors(color,white)) return CLOUD
+    if(equal_colors(color,orange_brown)) return QUESTION
+    if(equal_colors(color,brown)) return BRICK
+    if(equal_colors(color,medium_green)) return PIPE
+    // throw new Error(`unknown color ${color}`)
+    return NONE
+
+}
+
+export class PNGTileMap implements TileMap {
+    private img: HTMLImageElement;
+    private data: TileType[];
+    private loaded: boolean;
+    constructor() {
+        this.loaded = false
+        this.img = new Image()
+        this.img.src = "./mario-1-1@1.png"
+        this.img.onload = () => {
+            this.process_image()
+        }
+    }
+
+    get_height(): number {
+        if(this.loaded) return this.img.height
+        return 16
+    }
+
+    get_width(): number {
+        if(this.loaded) return this.img.width
+        return 16
+    }
+
+    tile_at(x, y): TileType {
+        if(this.loaded) {
+            return this.data[this.xy2n(x, y)]
+        }
+        return SOLID
+    }
+
+    tile_at_point(pt: Point): TileType {
+        return this.tile_at(pt.x,pt.y)
+    }
+
+    private process_image() {
+        this.data = new Array(this.img.width*this.img.height)
+        this.data.fill(TRANSPARENT)
+        let id = get_image_data(this.img)
+        for(let i=0; i<1000; i++) {
+            for(let j=0; j<this.get_height(); j++) {
+                let n = (i + j*id.width)*4
+                let color = [id.data[n+0],id.data[n+1],id.data[n+2],id.data[n+3]]
+                this.set_xy(i,j,calc_type(color))
+            }
+        }
+        // this.enhance()
+        this.loaded = true
+    }
+    private xy2n(i: number, j: number) {
+        return i + j * this.img.width
+    }
+    private set_xy(x: number, y: number, tt: TileType) {
+        if (x < 0) return
+        if (x >= this.img.width) return
+        if (y < 0) return;
+        if (y >= this.img.height) return
+        this.data[this.xy2n(x, y)] = tt
+    }
+    enhance() {
+        let d2 = new Array(this.data.length)
+        d2.fill(NONE)
+        for(let i=0; i<this.get_width(); i++) {
+            for(let j=0; j<this.get_height(); j++) {
+                let n = this.xy2n(i,j)
+                let v = this.data[n]
+                let left = this.tile_at(i-1,j)
+                let right = this.tile_at(i+1,j)
+                if(v === PIPE && left === TRANSPARENT) v = PIPE_LEFT
+                if(v === PIPE && right === TRANSPARENT) {
+                    console.log('doing pipe right')
+                    v = PIPE_RIGHT
+                }
+                if(v === MOUNTAIN && left === TRANSPARENT) v = MOUNTAIN_LEFT
+                if(v === MOUNTAIN && right === TRANSPARENT) v = MOUNTAIN_RIGHT
+                if(v === MOUNTAIN && left === TRANSPARENT && right === TRANSPARENT) v = MOUNTAIN_TOP
+                d2[n] = v
+            }
+        }
+        this.data = d2
+    }
+}

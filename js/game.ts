@@ -1,6 +1,6 @@
 import {Point} from "./util.js";
 import {Keyboard} from "./keyboard.js";
-import {BLOCKING, JSONTileMap, TileMap} from "./tilemap.js";
+import {BLOCKING, JSONTileMap, PNGTileMap, TileMap} from "./tilemap.js";
 import {Player} from "./player.js";
 import {ScreenBoard} from "./board.js";
 import {zzfx} from '../node_modules/zzfx/ZzFx.js'
@@ -42,7 +42,8 @@ export class Game {
         this.scale = 20
         this.board = new ScreenBoard(32,16, this.scale)
         this.player = new Player()
-        this.map = new JSONTileMap()
+        // this.map = new JSONTileMap()
+        this.map = new PNGTileMap()
         this.keyboard = new Keyboard()
         this.sounds = new SoundEffectManager()
     }
