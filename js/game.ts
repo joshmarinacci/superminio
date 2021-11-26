@@ -1,6 +1,6 @@
 import {Point} from "./util.js";
 import {Keyboard} from "./keyboard.js";
-import {BLOCKING, JSONTileMap} from "./tilemap.js";
+import {BLOCKING, JSONTileMap, TileMap} from "./tilemap.js";
 import {Player} from "./player.js";
 import {ScreenBoard} from "./board.js";
 import {zzfx} from '../node_modules/zzfx/ZzFx.js'
@@ -11,7 +11,11 @@ class SoundEffectManager {
     private sounds: Map<string, any>;
     constructor() {
         this.sounds = new Map<string,any>()
-        this.sounds.set('coin',[,,1675,,.06,.24,1,1.82,,,837,.06])
+        this.sounds.set('coin',[,,1675,,.06,.24,1,1.82,,,837,.06]); // coin
+        // this.sounds.set('over',[0.1,,925,.04,.3,.6,1,.3,,6.27,-184,.09,.17]); // Game Over
+        // this.sounds.set('over',[1.5,.8,270,,.1,,1,1.5,,,,,,,,.1,.01]); // Piano
+
+
     }
     trigger(name) {
         if(this.sounds.has(name)) {
@@ -24,7 +28,7 @@ export class Game {
     private board: ScreenBoard;
     private player: Player;
     private scale: number;
-    private map: JSONTileMap;
+    private map: TileMap;
     private debug:{
         slow: boolean;
     }
@@ -39,7 +43,6 @@ export class Game {
         this.board = new ScreenBoard(32,16, this.scale)
         this.player = new Player()
         this.map = new JSONTileMap()
-        this.map.enhance()
         this.keyboard = new Keyboard()
         this.sounds = new SoundEffectManager()
     }

@@ -39,8 +39,13 @@ BLOCKING.add(PIPE_RIGHT)
 
 type TileType = number
 
-interface TileMap {
+export interface TileMap {
     tile_at(x, y): TileType
+    tile_at_point(pt: Point): TileType
+
+    get_width(): number;
+
+    get_height(): number;
 }
 
 function log(...args) {
@@ -98,7 +103,7 @@ export class JSONTileMap implements TileMap {
         this.hline(35,1,2,CLOUD)
         this.vline(36, 9, 3, PIPE)
         this.vline(37, 9, 3, PIPE)
-
+        this.enhance()
     }
 
     enhance() {
@@ -159,5 +164,13 @@ export class JSONTileMap implements TileMap {
         if (y < 0) return;
         if (y >= this.height) return
         this.data[this.xy2n(x, y)] = tt
+    }
+
+    get_height(): number {
+        return this.height
+    }
+
+    get_width(): number {
+        return this.width
     }
 }

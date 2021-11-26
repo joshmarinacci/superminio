@@ -5,18 +5,14 @@ import {
     MOUNTAIN, MOUNTAIN_LEFT, MOUNTAIN_RIGHT, MOUNTAIN_TOP,
     PIPE_LEFT,
     PIPE_RIGHT, QUESTION,
-    SOLID,
+    SOLID, TileMap,
     TRANSPARENT, TREE
 } from "./tilemap.js";
 import {Player} from "./player.js";
 import {Point} from "./util.js";
 
 interface Board {
-//     scroll:Point
-//     width:32,
-//     height:16
     setup_canvas(): void;
-
     draw_screen(map: JSONTileMap, player: Player): void;
 }
 
@@ -72,7 +68,7 @@ export class ScreenBoard implements Board {
         }
     }
 
-    draw_screen(map: JSONTileMap, player: Player): void {
+    draw_screen(map: TileMap, player: Player): void {
         let c = this.canvas.getContext('2d')
         c.save()
         c.scale(this.scale, this.scale)
@@ -83,8 +79,8 @@ export class ScreenBoard implements Board {
         c.translate(-this.scroll.x, -this.scroll.y)
         let ts = 2*8
         //draw the tilemap
-        for (let i = 0; i < map.width; i++) {
-            for (let j = 0; j < map.height; j++) {
+        for (let i = 0; i < map.get_width(); i++) {
+            for (let j = 0; j < map.get_height(); j++) {
                 let t = map.tile_at(i, j)
                 if(TILESET_MAP.has(t)) {
                     let pt:Point = TILESET_MAP.get(t)
