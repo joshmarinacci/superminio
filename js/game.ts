@@ -3,7 +3,7 @@ import {Keyboard} from "./keyboard.js";
 import {BLOCKING, JSONTileMap, PNGTileMap, TileMap} from "./tilemap.js";
 import {Player} from "./player.js";
 import {ScreenBoard} from "./board.js";
-import {zzfx} from '../node_modules/zzfx/ZzFx.js'
+import {zzfx} from '../node_modules/zzfx/ZzFX.js'
 
 const log = (...args) => console.log(...args)
 
