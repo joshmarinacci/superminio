@@ -20,7 +20,7 @@ export class Game {
         this.debug = {
             slow:true
         }
-        this.scale = 10
+        this.scale = 20
         this.board = new ScreenBoard(32,16, this.scale)
         this.player = {
             alive:true,
