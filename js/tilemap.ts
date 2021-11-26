@@ -18,6 +18,7 @@ export const QUESTION = 12
 export const BRICK = 13
 export const CLOUD = 14
 export const GOOMBA = 15
+export const BLOCK = 16
 
 export const COLORS: Map<TileType, string> = new Map<TileType, string>()
 export const BLOCKING: Set<TileType> = new Set()
@@ -35,6 +36,9 @@ BLOCKING.add(GROUND)
 BLOCKING.add(PIPE)
 BLOCKING.add(PIPE_LEFT)
 BLOCKING.add(PIPE_RIGHT)
+BLOCKING.add(BRICK)
+BLOCKING.add(BLOCK)
+BLOCKING.add(QUESTION)
 
 
 type TileType = number
@@ -203,6 +207,7 @@ function calc_type(color: number[]):TileType {
     let brown = [172,124,0,255]
     let medium_green = [0,168,68,255]
 
+    let medium_brown = [136,20,0,255]
     if(equal_colors(color,DARK_BROWN)) return GROUND
     if(equal_colors(color,sky_blue)) return TRANSPARENT
     if(equal_colors(color,dark_green)) return MOUNTAIN
@@ -211,7 +216,8 @@ function calc_type(color: number[]):TileType {
     if(equal_colors(color,orange_brown)) return QUESTION
     if(equal_colors(color,brown)) return BRICK
     if(equal_colors(color,medium_green)) return PIPE
-    // throw new Error(`unknown color ${color}`)
+    if(equal_colors(color,medium_brown)) return BLOCK
+    throw new Error(`unknown color ${color}`)
     return NONE
 
 }
@@ -254,7 +260,7 @@ export class PNGTileMap implements TileMap {
         this.data = new Array(this.img.width*this.img.height)
         this.data.fill(TRANSPARENT)
         let id = get_image_data(this.img)
-        for(let i=0; i<1000; i++) {
+        for(let i=0; i<this.img.width; i++) {
             for(let j=0; j<this.get_height(); j++) {
                 let n = (i + j*id.width)*4
                 let color = [id.data[n+0],id.data[n+1],id.data[n+2],id.data[n+3]]

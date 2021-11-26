@@ -82,7 +82,7 @@ export class Game {
         if(this.keyboard.is_pressed('Space') && !this.player.jumping) {
             this.player.onground = false
             this.player.jumping = true
-            this.player.dv.y = -3
+            this.player.dv.y = -4
             this.sounds.trigger('coin')
         }
     }

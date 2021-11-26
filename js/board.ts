@@ -1,4 +1,5 @@
 import {
+    BLOCK,
     BRICK, CLOUD,
     COLORS, GOOMBA, GROUND,
     JSONTileMap,
@@ -30,6 +31,7 @@ TILESET_MAP.set(SOLID,new Point(0,1))
 TILESET_MAP.set(GROUND,new Point(0,1))
 TILESET_MAP.set(QUESTION,new Point(3,1))
 TILESET_MAP.set(BRICK,new Point(2,1))
+TILESET_MAP.set(BLOCK,new Point(7,0))
 
 TILESET_MAP.set(PIPE_LEFT,new Point(4,0))
 TILESET_MAP.set(PIPE_RIGHT,new Point(5,0))
