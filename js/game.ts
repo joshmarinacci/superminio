@@ -1,51 +1,8 @@
 import {Point} from "./util.js";
+import {Keyboard} from "./keyboard.js";
+import {BLOCKING, COLORS, JSONTileMap} from "./tilemap.js";
 
 const log = (...args) => console.log(...args)
-
-export class Keyboard {
-    private key_states: {};
-    private enabled: boolean;
-    constructor() {
-        this.key_states = {}
-        this.enabled = true
-    }
-    setup_input() {
-        document.addEventListener('keydown', (e) => {
-            if(!this.enabled) return
-            this.get_key_state(e.code).press = true
-        })
-        document.addEventListener('keyup', (e) => {
-            if(!this.enabled) return
-            this.get_key_state(e.code).press = false
-        })
-    }
-    is_pressed(name):boolean {
-        if(!this.enabled) return false
-        return this.get_key_state(name).press
-    }
-    stop() {
-        this.enabled = false
-        Object.keys(this.key_states).forEach(key => {
-            this.key_states[key] = false
-        })
-    }
-    start() {
-        this.enabled = true
-    }
-
-    update() {
-
-    }
-
-    private get_key_state(code: string) {
-        if(!this.key_states.hasOwnProperty(code)) {
-            this.key_states[code] = {
-                press:false
-            }
-        }
-        return this.key_states[code]
-    }
-}
 
 interface Player {
     alive: boolean;
@@ -58,92 +15,79 @@ interface Player {
     jumping:boolean
 }
 
-const NONE = 0
-const TRANSPARENT = 1
-const SOLID = 2
-const PIPE = 3
+interface Board {
+//     scroll:Point
+//     width:32,
+//     height:16
+    setup_canvas(): void;
 
-const COLORS:Map<TileType,string> = new Map<TileType, string>()
-COLORS.set(NONE,'magenta')
-COLORS.set(TRANSPARENT,'#3366FF')
-COLORS.set(SOLID,'#FFcc44')
-COLORS.set(PIPE,'#22cc22')
-
-const BLOCKING:Map<TileType,boolean> = new Map<TileType, boolean>()
-BLOCKING.set(NONE,false)
-BLOCKING.set(TRANSPARENT,false)
-BLOCKING.set(SOLID,true)
-BLOCKING.set(PIPE,true)
-
-type TileType = 0 | 1 | 2 | 3
-
-interface TileMap {
-    tile_at(x,y):TileType
+    draw_screen(map: JSONTileMap, player: Player): void;
 }
-
-class JSONTileMap implements TileMap {
-    private data: TileType[];
-    width: number;
+export class ScreenBoard implements Board {
     height: number;
-    constructor() {
-        this.width = 64
-        this.height = 16
-        this.data = []
-        for(let i=0; i<this.width; i++) {
-            for(let j=0; j<this.height; j++) {
-                this.data[this.xy2n(i,j)] = TRANSPARENT
+    scroll: Point;
+    width: number;
+    private scale: number;
+    private canvas: HTMLCanvasElement;
+
+    constructor(width: number, height: number, scale:number) {
+        this.scroll = new Point(0,0)
+        this.width = width
+        this.height = height
+        this.scale = scale
+    }
+
+    setup_canvas() {
+        this.canvas = document.createElement('canvas')
+        this.canvas.width = this.width*this.scale
+        this.canvas.height = this.height*this.scale
+        document.body.append(this.canvas)
+    }
+
+    draw_screen(map: JSONTileMap, player: Player): void {
+        let c = this.canvas.getContext('2d')
+        c.save()
+        c.scale(this.scale,this.scale)
+        c.fillStyle = '#f0f0f0'
+        c.fillRect(0,0,this.width,this.height)
+
+
+        c.translate(-this.scroll.x,-this.scroll.y)
+        //draw the tilemap
+        for(let i=0; i<map.width; i++) {
+            for(let j=0; j<map.height; j++) {
+                let t = map.tile_at(i,j)
+                c.fillStyle = 'yellow'
+                c.fillStyle = COLORS.get(t)
+                c.fillRect(i,j,1,1)
             }
         }
-    }
-    tile_at(x, y): TileType {
-        return this.get_xy(x,y)
-    }
-    tile_at_point(pt:Point):TileType {
-        return this.get_xy(pt.x,pt.y)
+
+        //draw the player
+        let tp = player.tile_pos
+        c.fillStyle = '#ff0000'
+        c.fillRect(tp.x,tp.y,1,1)
+
+        c.restore()
     }
 
-    private xy2n(i: number, j: number) {
-        return i + j*this.width
-    }
-
-    hline(x: number, y: number, len: number, tt:TileType) {
-        for(let i=0; i<len; i++) {
-            this.set_xy(x+i,y,tt)
+    update_scroll(player: Player) {
+        //if player too far to the left, scroll to the right, unless at the end
+        //if player too far to the right, scroll to the left
+        let diff = player.tile_pos.x - this.scroll.x
+        if(diff > 20) {
+            this.scroll.x += 1
         }
-    }
-    vline(x: number, y: number, len: number, tt:TileType) {
-        for(let i=0; i<len; i++) {
-            this.set_xy(x,y+i,tt)
+        if(diff < 4) {
+            this.scroll.x -= 1
         }
-    }
-    private get_xy(x:number, y:number):TileType {
-        if(x<0) return NONE
-        if(x>=this.width) return NONE
-        if(y<0)return NONE
-        if(y>=this.height) return NONE
-        return this.data[this.xy2n(x,y)]
-    }
-
-    private set_xy(x: number, y: number, tt: TileType) {
-        if(x<0) return
-        if(x>=this.width) return
-        if(y<0)return;
-        if(y>=this.height) return
-        this.data[this.xy2n(x,y)] = tt
+        if(this.scroll.x < 0) this.scroll.x = 0
     }
 }
-
-interface Board {
-    scroll:Point
-    width:32,
-    height:16
-}
-
 
 export class Game {
-    private board: Board;
+    private board: ScreenBoard;
     private player: Player;
-    private canvas: HTMLCanvasElement;
     private scale: number;
     private map: JSONTileMap;
     private debug:{
@@ -156,11 +100,7 @@ export class Game {
             slow:true
         }
         this.scale = 10
-        this.board = {
-            height: 16,
-            scroll: new Point(0,0),
-            width: 32
-        }
+        this.board = new ScreenBoard(32,16, this.scale)
         this.player = {
             alive:true,
             big: false,
@@ -171,35 +111,21 @@ export class Game {
             dv:new Point(0,1),
             gravity: new Point(0,1)
         }
-
         this.map = new JSONTileMap()
-        this.map.hline(0,12,50, SOLID)
-        this.map.hline(0,13,50, SOLID)
-        this.map.hline(0,14,50, SOLID)
-        this.map.hline(0,15,50, SOLID)
-
-        this.map.vline(0,0,20,SOLID)
-
-        this.map.vline(20,11,1, SOLID)
-        this.map.vline(21,10,2, SOLID)
-        this.map.vline(22,9,3, SOLID)
-
-        this.map.vline(27, 7,5,PIPE)
-        this.map.vline(28, 7,5,PIPE)
-
         this.keyboard = new Keyboard()
     }
 
     start() {
         log('starting')
-        this.setup_canvas()
+        this.board.setup_canvas()
+        this.keyboard.setup_input()
         this.loop()
     }
     loop() {
         this.check_input()
         this.run_physics()
-        this.update_scroll()
-        this.draw_screen()
+        this.board.update_scroll(this.player)
+        this.board.draw_screen(this.map,this.player)
         if(this.debug.slow) {
             setTimeout(()=>this.loop(),50)
         } else {
@@ -207,13 +133,6 @@ export class Game {
         }
     }
 
-    private setup_canvas() {
-        this.canvas = document.createElement('canvas')
-        this.canvas.width = this.board.width*this.scale
-        this.canvas.height = this.board.height*this.scale
-        document.body.append(this.canvas)
-        this.keyboard.setup_input()
-    }
 
     private check_input() {
         this.keyboard.update()
@@ -277,48 +196,6 @@ export class Game {
 
     }
 
-    private draw_screen() {
-        let c = this.canvas.getContext('2d')
-        c.save()
-        c.scale(this.scale,this.scale)
-        c.fillStyle = '#f0f0f0'
-        c.fillRect(0,0,this.board.width,this.board.height)
-
-
-        c.translate(-this.board.scroll.x,-this.board.scroll.y)
-        //draw the tilemap
-        for(let i=0; i<this.map.width; i++) {
-            for(let j=0; j<this.map.height; j++) {
-                let t = this.map.tile_at(i,j)
-                c.fillStyle = 'yellow'
-                c.fillStyle = COLORS.get(t)
-                // if(t === NONE) c.fillStyle = '#cccccc'
-                // if(t === TRANSPARENT) c.fillStyle = 'white'
-                // if(t === SOLID) c.fillStyle = 'tan'
-                c.fillRect(i,j,1,1)
-            }
-        }
-
-        //draw the player
-        let tp = this.player.tile_pos
-        c.fillStyle = '#ff0000'
-        c.fillRect(tp.x,tp.y,1,1)
-
-        c.restore()
-    }
-
-    private update_scroll() {
-        //if player too far to the left, scroll to the right, unless at the end
-        //if player too far to the right, scroll to the left
-        let diff = this.player.tile_pos.x - this.board.scroll.x
-        if(diff > 20) {
-            this.board.scroll.x += 1
-        }
-        if(diff < 4) {
-            this.board.scroll.x -= 1
-        }
-        if(this.board.scroll.x < 0) this.board.scroll.x = 0
-    }
 }
 
 /*
