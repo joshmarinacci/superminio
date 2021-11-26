@@ -3,8 +3,22 @@ import {Keyboard} from "./keyboard.js";
 import {BLOCKING, JSONTileMap} from "./tilemap.js";
 import {Player} from "./player.js";
 import {ScreenBoard} from "./board.js";
+import {zzfx} from '../node_modules/zzfx/ZzFx.js'
 
 const log = (...args) => console.log(...args)
+
+class SoundEffectManager {
+    private sounds: Map<string, any>;
+    constructor() {
+        this.sounds = new Map<string,any>()
+        this.sounds.set('coin',[,,1675,,.06,.24,1,1.82,,,837,.06])
+    }
+    trigger(name) {
+        if(this.sounds.has(name)) {
+            zzfx(...this.sounds.get(name))
+        }
+    }
+}
 
 export class Game {
     private board: ScreenBoard;
@@ -15,6 +29,7 @@ export class Game {
         slow: boolean;
     }
     private keyboard: Keyboard;
+    private sounds: SoundEffectManager;
 
     constructor() {
         this.debug = {
@@ -26,6 +41,7 @@ export class Game {
         this.map = new JSONTileMap()
         this.map.enhance()
         this.keyboard = new Keyboard()
+        this.sounds = new SoundEffectManager()
     }
 
     start() {
@@ -63,6 +79,7 @@ export class Game {
             this.player.onground = false
             this.player.jumping = true
             this.player.dv.y = -3
+            this.sounds.trigger('coin')
         }
     }
 
